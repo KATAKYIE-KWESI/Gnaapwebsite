@@ -1,4 +1,4 @@
-'use client';
+='use client';
 
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, BookOpen, Heart } from 'lucide-react';
@@ -66,106 +66,82 @@ export default function ImageSlider() {
     <section className="bg-forest-950 py-12 md:py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Header Section */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-2 text-gold-500 font-bold tracking-[0.2em] uppercase text-xs">
-              <div className="w-10 h-[2px] bg-gold-500" />
+        {/* Header Section - Stacked for mobile */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 md:mb-12 gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2 text-gold-500 font-bold tracking-[0.2em] uppercase text-[10px] md:text-xs">
+              <div className="w-8 md:w-10 h-[2px] bg-gold-500" />
               Impact Gallery
             </div>
-            <h2 className="font-display font-bold text-white text-3xl sm:text-6xl">
+            <h2 className="font-display font-bold text-white text-2xl sm:text-6xl">
               GNAAP <span className="text-gold-500 italic">In Focus</span>
             </h2>
           </div>
           
-          <div className="flex items-center gap-4">
-             <button 
-               onClick={prev} 
-               className="group p-3 md:p-4 rounded-full border border-white/10 bg-white/5 hover:bg-gold-500 hover:border-gold-500 transition-all duration-300"
-               aria-label="Previous slide"
-             >
-                <ChevronLeft className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />
+          <div className="flex items-center gap-3">
+             <button onClick={prev} className="group p-3 rounded-full border border-white/10 bg-white/5 hover:bg-gold-500 transition-all">
+                <ChevronLeft className="w-5 h-5 text-white" />
              </button>
-             <button 
-               onClick={next} 
-               className="group p-3 md:p-4 rounded-full border border-white/10 bg-white/5 hover:bg-gold-500 hover:border-gold-500 transition-all duration-300"
-               aria-label="Next slide"
-             >
-                <ChevronRight className="w-5 h-5 md:w-6 md:h-6 text-white group-hover:scale-110 transition-transform" />
+             <button onClick={next} className="group p-3 rounded-full border border-white/10 bg-white/5 hover:bg-gold-500 transition-all">
+                <ChevronRight className="w-5 h-5 text-white" />
              </button>
           </div>
         </div>
 
-        {/* Slider Frame */}
-        <div className="relative rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl aspect-[4/5] sm:aspect-[16/9] md:aspect-[21/9] group bg-forest-900">
+        {/* Slider Frame - Portrait on mobile, Landscape on desktop */}
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[3/4] sm:aspect-[16/9] md:aspect-[21/9] bg-forest-900">
           {slides.map((slide, i) => {
             const isActive = i === current;
             return (
               <div
                 key={i}
                 className={`absolute inset-0 transition-all duration-1000 ease-in-out ${
-                  isActive ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'
+                  isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'
                 }`}
               >
-                {/* Background Image */}
                 <img
                   src={slide.src}
                   alt={slide.alt}
-                  className={`w-full h-full object-cover transition-transform duration-[15000ms] ease-linear ${
-                    isActive ? 'scale-110' : 'scale-100'
-                  }`}
+                  className={`w-full h-full object-cover transition-transform duration-[10000ms] ${isActive ? 'scale-105' : 'scale-100'}`}
                 />
 
-                {/* Mobile-First Aesthetic Overlays */}
-                <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/40 to-transparent opacity-95 md:opacity-90" />
-                <div className="absolute inset-0 bg-forest-950/20 md:bg-gradient-to-r md:from-forest-950/60 md:to-transparent" />
+                {/* Darker Overlays for text safety */}
+                <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/70 to-transparent md:via-forest-950/40" />
                 
-                {/* Text Content */}
-                <div className="absolute inset-0 flex flex-col justify-end p-6 md:p-16">
-                  <div className={`max-w-2xl transition-all duration-1000 delay-300 transform ${
-                    isActive ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                {/* Text Content - Centered on mobile to avoid bottom cutoff */}
+                <div className="absolute inset-0 flex flex-col justify-center md:justify-end p-6 md:p-16">
+                  <div className={`max-w-2xl transition-all duration-700 transform ${
+                    isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                   }`}>
-                    {/* Badge */}
-                    <span className="inline-flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-gold-500 text-forest-950 text-[10px] md:text-xs font-bold uppercase mb-4 md:mb-6 shadow-lg shadow-gold-500/20">
-                      <BookOpen className="w-3 h-3" />
+                    <span className="inline-block px-3 py-1 rounded-full bg-gold-500 text-forest-950 text-[10px] font-bold uppercase mb-3">
                       {slide.tag}
                     </span>
                     
-                    <h3 className="font-display text-white text-2xl sm:text-4xl md:text-6xl font-bold leading-tight drop-shadow-md">
+                    <h3 className="font-display text-white text-2xl md:text-6xl font-bold leading-tight">
                       {slide.caption}
                     </h3>
                     
-                    <p className="font-body text-cream-100 text-sm md:text-xl mt-3 md:mt-6 leading-relaxed max-w-lg opacity-90 line-clamp-3 md:line-clamp-none">
+                    <p className="font-body text-cream-100 text-sm md:text-xl mt-2 md:mt-6 opacity-90 line-clamp-3 md:line-clamp-none">
                       {slide.sub}
                     </p>
 
-                    <div className="mt-6 md:mt-8 flex items-center gap-6">
-                        <div className="flex items-center gap-2 text-gold-400">
-                            <Heart className="w-4 h-4 md:w-5 md:h-5 fill-gold-500" />
-                            <span className="text-xs md:text-sm font-medium">GNAAP Initiative</span>
-                        </div>
+                    <div className="mt-4 md:mt-8 flex items-center gap-2 text-gold-400">
+                        <Heart className="w-4 h-4 fill-gold-500" />
+                        <span className="text-[10px] md:text-sm font-medium uppercase tracking-wider">GNAAP Initiative</span>
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
-
-          {/* Grainy texture */}
-          <div className="absolute inset-0 opacity-20 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/felt.png')]" />
         </div>
 
-        {/* Progress Indicators */}
-        <div className="flex justify-center items-center gap-2 md:gap-3 mt-8 md:mt-12">
+        {/* Progress Dots */}
+        <div className="flex justify-center gap-2 mt-8">
           {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => goTo(i)}
-              className="group relative"
-              aria-label={`Go to slide ${i + 1}`}
-            >
-              <div className={`h-1 md:h-1.5 transition-all duration-500 rounded-full ${
-                i === current ? 'w-8 md:w-16 bg-gold-500' : 'w-2 md:w-4 bg-white/10 group-hover:bg-white/30'
+            <button key={i} onClick={() => goTo(i)} className="p-2">
+              <div className={`h-1.5 transition-all duration-300 rounded-full ${
+                i === current ? 'w-8 bg-gold-500' : 'w-2 bg-white/20'
               }`} />
             </button>
           ))}
