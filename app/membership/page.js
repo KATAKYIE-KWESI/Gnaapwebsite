@@ -57,7 +57,7 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* ── Main Navigation Cards (From image_3c2cbd.png) ── */}
+      {/* ── Main Navigation Cards ── */}
       <section ref={ref1} className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -158,13 +158,19 @@ export default function MembershipPage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="font-display font-bold text-4xl mb-8">Ready to Apply?</h2>
           <p className="font-body text-cream-200 text-lg mb-10">
-            Download our membership forms below or contact our secretariat for guidance on the application process.
+            Fill out our membership form online easily or contact our secretariat for guidance.
           </p>
           <div className="flex flex-wrap justify-center gap-6">
-            <button className="flex items-center gap-3 px-10 py-4 bg-gold-500 hover:bg-gold-600 text-ink font-bold rounded-full transition-all shadow-lg">
-              <Download className="w-5 h-5" />
-              Download Application Form
-            </button>
+            {/* Link to Google Form replacing the previous download button */}
+            <Link 
+              href="https://forms.gle/1Bpnqrj7nqzH7dsEA" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 px-10 py-4 bg-gold-500 hover:bg-gold-600 text-ink font-bold rounded-full transition-all shadow-lg"
+            >
+              <FileText className="w-5 h-5" />
+              Fill Application Form
+            </Link>
             <Link href="/contact" className="flex items-center gap-3 px-10 py-4 border-2 border-white/30 hover:bg-white hover:text-forest-700 font-bold rounded-full transition-all">
               Contact Secretariat
             </Link>

@@ -1,49 +1,81 @@
 'use client';
 
-import { useState } from 'react';
-import { useAnimateOnScroll } from '@/lib/useAnimateOnScroll';
-import { ShoppingCart, Star, Search, BookOpen } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Star, Search, BookOpen, Loader2 } from 'lucide-react';
 
-const books = [
-  { id: 1, title: 'Voices from the Volta',       author: 'Kwame Asante',       category: 'Fiction',       price: 'GH₵ 45', rating: 4.8, reviews: 23, color: 'bg-forest-600'  },
-  { id: 2, title: 'The Drumming of Ancestors',   author: 'Abena Mensah',       category: 'Poetry',        price: 'GH₵ 35', rating: 4.9, reviews: 41, color: 'bg-gold-600'    },
-  { id: 3, title: 'Ghana: A Business Chronicle', author: 'Kofi Boateng',       category: 'Non-Fiction',   price: 'GH₵ 60', rating: 4.7, reviews: 17, color: 'bg-forest-800'  },
-  { id: 4, title: 'Children of the Harmattan',   author: 'Akosua Frimpong',    category: 'Fiction',       price: 'GH₵ 40', rating: 5.0, reviews: 58, color: 'bg-gold-700'    },
-  { id: 5, title: 'Letters to Accra',            author: 'Yaw Darko',          category: 'Poetry',        price: 'GH₵ 30', rating: 4.6, reviews: 12, color: 'bg-forest-700'  },
-  { id: 6, title: 'Publishing in the Digital Age',author: 'Dr. Ama Owusu',    category: 'Non-Fiction',   price: 'GH₵ 55', rating: 4.8, reviews: 29, color: 'bg-ink-soft'    },
-];
+// Categories match the Backend Enum exactly
+const categories = ['All', 'Fiction', 'Non-Fiction', 'Poetry', 'Children', 'Academic', 'Biography', 'Drama'];
 
-const categories = ['All', 'Fiction', 'Poetry', 'Non-Fiction'];
-
-function StarRating({ rating }) {
+/**
+ * Helper component to render stars based on the average rating
+ */
+const StarRating = ({ rating }) => {
   return (
-    <div className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((s) => (
+    <div className="flex gap-0.5">
+      {[...Array(5)].map((_, i) => (
         <Star
-          key={s}
-          className={`w-3 h-3 ${s <= Math.round(rating) ? 'text-gold-500 fill-gold-500' : 'text-cream-400'}`}
+          key={i}
+          className={`w-3 h-3 ${
+            i < Math.floor(rating || 0) 
+              ? 'fill-gold-400 text-gold-400' 
+              : 'text-cream-300 fill-cream-200'
+          }`}
         />
       ))}
     </div>
   );
-}
+};
 
 export default function BookstorePage() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [active, setActive] = useState('All');
   const [search, setSearch] = useState('');
-  const ref = useAnimateOnScroll();
 
-  const filtered = books.filter((b) => {
-    const matchCat = active === 'All' || b.category === active;
-    const matchQ   = b.title.toLowerCase().includes(search.toLowerCase()) ||
-                     b.author.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchQ;
-  });
+  // Correctly named ref to avoid conflicts with reserved words
+  const scrollRef = useRef(null);
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        
+        // Only append if it's a specific category
+        if (active !== 'All') params.append('category', active);
+        if (search) params.append('search', search);
+
+        const response = await fetch(`${API_URL}/books?${params.toString()}`);
+        
+        if (!response.ok) throw new Error(`Server responded with ${response.status}`);
+
+        const data = await response.json();
+        
+        // Ensure we are targeting 'data.books' based on backend structure
+        if (data && data.success && Array.isArray(data.books)) {
+          setBooks(data.books);
+        } else {
+          setBooks([]);
+        }
+      } catch (error) {
+        console.error("❌ Bookstore Connection Error:", error);
+        setBooks([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    // Debounce avoids hitting the server on every single keystroke in search
+    const debounce = setTimeout(fetchBooks, 400);
+    return () => clearTimeout(debounce);
+  }, [active, search, API_URL]);
 
   return (
-    <>
-      {/* Hero */}
-      <section className="pt-40 pb-20 hero-bg relative overflow-hidden">
+    <div className="min-h-screen bg-cream-50">
+      {/* Hero Section */}
+      <section className="pt-40 pb-20 hero-bg relative overflow-hidden bg-ink">
         <div className="absolute inset-0 opacity-[0.04]"
           style={{ backgroundImage: `radial-gradient(circle, #C9983B 1.5px, transparent 1.5px)`, backgroundSize: '28px 28px' }} />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,14 +84,14 @@ export default function BookstorePage() {
             Discover <span className="text-gold-shimmer">Ghanaian</span><br />Literature
           </h1>
           <p className="font-body text-cream-300 text-lg mt-6 max-w-xl leading-relaxed">
-            Explore a curated selection of books by GNAAP member authors — fiction, poetry,
-            non-fiction and more, all celebrating the richness of Ghanaian culture and thought.
+            Explore a curated selection of books by GNAAP member authors — celebrating 
+            the richness of Ghanaian culture and thought.
           </p>
         </div>
       </section>
 
-      {/* Filter bar */}
-      <section className="sticky top-20 z-30 bg-white/95 backdrop-blur border-b border-cream-300 py-4">
+      {/* Filter & Search Bar */}
+      <section className="sticky top-20 z-30 bg-white/95 backdrop-blur border-b border-cream-300 py-4 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
@@ -67,67 +99,101 @@ export default function BookstorePage() {
                 key={cat}
                 onClick={() => setActive(cat)}
                 className={`px-4 py-1.5 rounded-full text-xs font-body font-semibold transition-all ${
-                  active === cat ? 'bg-forest-600 text-white' : 'bg-cream-100 text-ink-muted hover:bg-cream-200'
+                  active === cat ? 'bg-forest-600 text-white shadow-md' : 'bg-cream-100 text-ink-muted hover:bg-cream-200'
                 }`}
               >
                 {cat}
               </button>
             ))}
           </div>
-          <div className="relative">
+          <div className="relative w-full sm:w-auto">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-light" />
             <input
               type="text"
-              placeholder="Search books or authors…"
+              placeholder="Search titles or authors…"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-cream-100 border border-cream-300 rounded-full text-sm font-body focus:outline-none focus:ring-2 focus:ring-gold-400 w-64"
+              className="pl-9 pr-4 py-2 bg-cream-100 border border-cream-300 rounded-full text-sm font-body focus:outline-none focus:ring-2 focus:ring-gold-400 w-full sm:w-64"
             />
           </div>
         </div>
       </section>
 
-      {/* Books grid */}
-      <section ref={ref} className="py-16 bg-cream-50">
+      {/* Books Display Area */}
+      <section ref={scrollRef} className="py-16 min-h-[500px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map(({ id, title, author, category, price, rating, reviews, color }, i) => (
-              <div key={id} className={`animate-on-scroll delay-${Math.min((i % 3 + 1) * 100, 300)} card-lift`}>
-                <div className="bg-white rounded-2xl border border-cream-300 overflow-hidden group hover:border-gold-300 transition-colors duration-300 h-full flex flex-col">
-                  {/* Book cover visual */}
-                  <div className={`${color} h-48 relative flex items-center justify-center overflow-hidden`}>
-                    <div className="absolute inset-0 opacity-10"
-                      style={{ backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`, backgroundSize: '20px 20px' }} />
-                    <BookOpen className="w-20 h-20 text-white/30" />
-                    <div className="absolute bottom-4 left-5 right-5">
-                      <p className="font-display font-bold text-white text-lg leading-snug line-clamp-2">{title}</p>
-                      <p className="font-body text-white/70 text-xs mt-1">{author}</p>
+          
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20">
+              <Loader2 className="w-10 h-10 text-forest-600 animate-spin" />
+              <p className="mt-4 font-body text-ink-muted italic">Opening the vault...</p>
+            </div>
+          ) : books.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {books.map((book, i) => (
+                <div key={book._id} className="h-full">
+                  <div className="bg-white rounded-2xl border border-cream-300 overflow-hidden group hover:border-gold-300 transition-all duration-300 h-full flex flex-col shadow-sm hover:shadow-md">
+                    
+                    <div className="bg-forest-800 h-64 relative flex items-center justify-center overflow-hidden">
+                      {book.coverImage ? (
+                        <img 
+                          src={book.coverImage} 
+                          alt={book.title} 
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      ) : (
+                        <div className="flex flex-col items-center gap-2 opacity-30">
+                          <BookOpen className="w-16 h-16 text-white" />
+                          <span className="text-white text-[10px] font-body uppercase tracking-widest">No Cover</span>
+                        </div>
+                      )}
+                      <span className="absolute top-4 right-4 bg-forest-900/80 text-white text-[10px] font-body font-bold px-3 py-1 rounded-full uppercase tracking-widest backdrop-blur-sm">
+                        {book.category}
+                      </span>
                     </div>
-                    <span className="absolute top-3 right-3 bg-white/20 text-white text-[10px] font-body font-semibold px-2 py-1 rounded-full uppercase tracking-wide">
-                      {category}
-                    </span>
-                  </div>
 
-                  <div className="p-5 flex flex-col flex-1">
-                    <div className="flex items-center gap-2 mb-3">
-                      <StarRating rating={rating} />
-                      <span className="font-body text-xs text-ink-muted">{rating} ({reviews})</span>
-                    </div>
-                    <h3 className="font-display font-semibold text-ink text-lg leading-snug mb-1 group-hover:text-forest-600 transition-colors">{title}</h3>
-                    <p className="font-body text-xs text-ink-muted mb-4">by {author}</p>
-                    <div className="mt-auto flex items-center justify-between">
-                      <span className="font-display font-bold text-xl text-forest-600">{price}</span>
-                      <button className="inline-flex items-center gap-2 px-4 py-2 bg-forest-600 hover:bg-gold-500 text-white font-body font-semibold text-xs rounded-full transition-all duration-200">
-                        <ShoppingCart className="w-3.5 h-3.5" /> Add to Cart
-                      </button>
+                    <div className="p-6 flex flex-col flex-1">
+                      <div className="flex items-center gap-2 mb-3">
+                        <StarRating rating={book.avgRating} />
+                        <span className="font-body text-xs text-ink-muted">
+                          {book.avgRating || 0} ({book.totalReviews || 0})
+                        </span>
+                      </div>
+                      
+                      <h3 className="font-display font-bold text-ink text-xl leading-tight mb-1 group-hover:text-forest-600 transition-colors">
+                        {book.title}
+                      </h3>
+                      <p className="font-body text-sm text-ink-muted mb-6 italic">by {book.author}</p>
+                      
+                      <div className="mt-auto flex items-center justify-between border-t border-cream-100 pt-5">
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-ink-light font-body uppercase tracking-tighter">Price</span>
+                          <span className="font-display font-bold text-2xl text-forest-700">GH₵ {book.price}</span>
+                        </div>
+                        <button className="inline-flex items-center gap-2 px-5 py-2.5 bg-forest-600 hover:bg-gold-500 text-white font-body font-bold text-xs rounded-full transition-all active:scale-95">
+                          <ShoppingCart className="w-4 h-4" /> Add to Cart
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-24 bg-white rounded-3xl border border-dashed border-cream-300">
+              <BookOpen className="w-12 h-12 text-cream-400 mx-auto mb-4" />
+              <h3 className="font-display font-bold text-xl text-ink">No books found</h3>
+              <p className="font-body text-ink-muted mt-2">Try adjusting your filters or search terms.</p>
+              <button 
+                onClick={() => { setActive('All'); setSearch(''); }}
+                className="mt-6 text-forest-600 font-body font-bold text-sm underline underline-offset-4"
+              >
+                Clear all filters
+              </button>
+            </div>
+          )}
         </div>
       </section>
-    </>
+    </div>
   );
 }

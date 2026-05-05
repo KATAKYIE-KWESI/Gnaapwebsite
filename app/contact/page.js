@@ -5,10 +5,10 @@ import { useAnimateOnScroll } from '@/lib/useAnimateOnScroll';
 import { Mail, Phone, MapPin, Clock, Send, CheckCircle2 } from 'lucide-react';
 
 const contactInfo = [
-  { icon: Mail,    label: 'Email',   value: 'info@gnaaponline.com',        sub: 'We respond within 24 hours' },
-  { icon: Phone,   label: 'Phone',   value: '+233 (0) 123 456 789',        sub: 'Mon – Sat, 9AM – 5PM' },
-  { icon: MapPin,  label: 'Office',  value: 'Accra, Ghana',                sub: 'Visit us at our secretariat' },
-  { icon: Clock,   label: 'Hours',   value: 'Mon – Sat: 9AM – 5PM',       sub: 'Closed on public holidays' },
+  { icon: Mail,   label: 'Email',   value: 'info@gnaaponline.com',        sub: 'We respond within 24 hours' },
+  { icon: Phone,  label: 'Phone',   value: '+233 (0) 123 456 789',        sub: 'Mon – Sat, 9AM – 5PM' },
+  { icon: MapPin, label: 'Office',  value: 'Accra, Ghana',                sub: 'Visit us at our secretariat' },
+  { icon: Clock,  label: 'Hours',   value: 'Mon – Sat: 9AM – 5PM',        sub: 'Closed on public holidays' },
 ];
 
 export default function ContactPage() {
@@ -21,14 +21,38 @@ export default function ContactPage() {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   }
 
-  function handleSubmit(e) {
+  // Updated handleSubmit with real API connection
+  async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    // Simulate API call — replace with real fetch() to your Node backend later
-    setTimeout(() => {
+
+    try {
+      // Uses environment variable or defaults to localhost
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      
+      const response = await fetch(`${apiUrl}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSent(true);
+        setForm({ name: '', email: '', subject: '', message: '' });
+      } else {
+        // Displays error message from backend if available
+        alert(data.message || 'Something went wrong. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Submission error:', error);
+      alert('Could not connect to the server. Please check if the backend is running.');
+    } finally {
       setLoading(false);
-      setSent(true);
-    }, 1500);
+    }
   }
 
   return (
@@ -82,7 +106,7 @@ export default function ContactPage() {
 
           {/* Right — Form */}
           <div className="lg:col-span-3 animate-on-scroll delay-200">
-            <div className="bg-white rounded-3xl border border-cream-300 p-8 sm:p-10">
+            <div className="bg-white rounded-3xl border border-cream-300 p-8 sm:p-10 shadow-sm">
               {sent ? (
                 <div className="flex flex-col items-center justify-center h-full py-16 text-center">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-5">
@@ -93,7 +117,7 @@ export default function ContactPage() {
                     Thank you for reaching out. Our team will get back to you within 24 hours.
                   </p>
                   <button
-                    onClick={() => { setSent(false); setForm({ name: '', email: '', subject: '', message: '' }); }}
+                    onClick={() => { setSent(false); }}
                     className="mt-6 px-6 py-2.5 bg-forest-600 text-white font-body font-semibold text-sm rounded-full hover:bg-forest-700 transition-colors"
                   >
                     Send Another
