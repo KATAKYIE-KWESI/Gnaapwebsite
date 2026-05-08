@@ -2,6 +2,8 @@ import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { CartProvider } from '@/lib/CartContext';
+import CartDrawer from '@/components/CartDrawer';
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -39,9 +41,12 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${cormorant.variable} ${jakarta.variable}`}>
       <body className="grain">
-        <Navbar />
-        <main>{children}</main>
-        <Footer />
+        <CartProvider>
+          <Navbar />
+          <CartDrawer />
+          <main>{children}</main>
+          <Footer />
+        </CartProvider>
       </body>
     </html>
   );

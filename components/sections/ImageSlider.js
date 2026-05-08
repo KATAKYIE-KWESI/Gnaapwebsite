@@ -63,7 +63,7 @@ export default function ImageSlider() {
   }, [next]);
 
   return (
-    <section className="bg-forest-950 py-12 md:py-24 overflow-hidden">
+    <section className="bg-forest-950 pt-24 pb-12 md:py-24 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header Section - Stacked for mobile */}
@@ -73,7 +73,7 @@ export default function ImageSlider() {
               <div className="w-8 md:w-10 h-[2px] bg-gold-500" />
               Impact Gallery
             </div>
-            <h2 className="font-display font-bold text-white text-2xl sm:text-6xl">
+            <h2 className="font-display font-bold text-white text-2xl sm:text-6xl [text-shadow:0_2px_12px_rgba(0,0,0,0.5)]">
               GNAAP <span className="text-gold-500 italic">In Focus</span>
             </h2>
           </div>
@@ -109,7 +109,7 @@ export default function ImageSlider() {
                 <div className="absolute inset-0 bg-gradient-to-t from-forest-950 via-forest-950/70 to-transparent md:via-forest-950/40" />
                 
                 {/* Text Content - Centered on mobile to avoid bottom cutoff */}
-                <div className="absolute inset-0 flex flex-col justify-center md:justify-end p-6 md:p-16">
+                <div className="absolute inset-0 flex flex-col justify-end p-5 pb-8 md:p-16">
                   <div className={`max-w-2xl transition-all duration-700 transform ${
                     isActive ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                   }`}>

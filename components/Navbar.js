@@ -2,9 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { default as NextImage } from 'next/image'; // Use alias to avoid TypeError
+import { default as NextImage } from 'next/image'; 
 import { usePathname } from 'next/navigation';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/lib/CartContext';
 
 const navLinks = [
   { href: '/',         label: 'Home' },
@@ -20,6 +21,8 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = usePathname();
 
+  const { count, setOpen } = useCart();
+
   const isHome = pathname === '/';
 
   useEffect(() => {
@@ -31,14 +34,13 @@ export default function Navbar() {
   // Close mobile menu when route changes
   useEffect(() => { setMenuOpen(false); }, [pathname]);
 
-  const navBg = scrolled || !isHome 
-    ? 'bg-cream-50/95 backdrop-blur-md shadow-sm border-b border-cream-300' 
-    : 'bg-transparent';
+  const navBg = scrolled || !isHome
+  ? 'bg-cream-50/95 backdrop-blur-md shadow-sm border-b border-cream-300'
+  : 'bg-cream-50/95 md:bg-transparent backdrop-blur-md md:backdrop-blur-none shadow-sm md:shadow-none border-b border-cream-300 md:border-b-0';
 
-  const textColor = scrolled || !isHome ? 'text-ink' : 'text-cream-100';
-  const logoMainColor = scrolled || !isHome ? 'text-forest-600' : 'text-white';
-  const logoSubColor = scrolled || !isHome ? 'text-gold-600' : 'text-gold-400';
-
+const textColor = scrolled || !isHome ? 'text-ink' : 'text-ink md:text-cream-100';
+const logoMainColor = scrolled || !isHome ? 'text-forest-600' : 'text-forest-600 md:text-white';
+const logoSubColor = scrolled || !isHome ? 'text-gold-600' : 'text-gold-600 md:text-gold-400';
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-400 ${navBg}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -80,14 +82,26 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* CTA + Cart */}
+          <div className="hidden md:flex items-center gap-3">
+            <button onClick={() => setOpen(true)}
+              className={`relative p-2 rounded-full transition-colors ${scrolled || !isHome ? 'hover:bg-cream-200 text-ink' : 'hover:bg-white/15 text-white'}`}
+              aria-label="Open cart">
+              <ShoppingCart className="w-5 h-5"/>
+              {count > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-gold-500 text-forest-900 text-[10px] font-bold flex items-center justify-center">
+                  {count > 9 ? '9+' : count}
+                </span>
+              )}
+            </button>
             <Link
               href="/membership"
               className="px-5 py-2.5 bg-gold-500 hover:bg-gold-600 text-white text-sm font-body font-semibold rounded-full transition-all duration-200 hover:shadow-lg hover:shadow-gold-500/25 hover:-translate-y-0.5"
             >
               Join GNAAP
             </Link>
+
+          
           </div>
 
           {/* Mobile hamburger */}
